@@ -1,539 +1,449 @@
--- Plants vs Brainrots Ultimate AFK Farm with Premium UI
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse()
-local RunService = game:GetService("RunService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local TweenService = game:GetService("TweenService")
+-- Plants vs Brainrots - Venus UI Full Script
+local Venus = loadstring(game:HttpGet('https://raw.githubusercontent.com/Stefanuk12/Venus/main/Loader.lua'))()
 
--- Загрузка премиум UI библиотек
-local OrionLib = loadstring(game:HttpGet(("https://raw.githubusercontent.com/shlexware/Orion/main/source")))()
-local Venus = loadstring(game:HttpGet("https://raw.githubusercontent.com/yofriendfromschool1/sky-hub/main/venus.lua"))()
-local Flux = loadstring(game:HttpGet('https://raw.githubusercontent.com/roblox_4life/FluxLib/main/Lib.lua'))()
-local Celestial = loadstring(game:HttpGet("https://raw.githubusercontent.com/x4c0/Celestial/main/Library.lua"))()
-
--- Используем Orion UI (очень крутая и популярная)
-local Window = OrionLib:MakeWindow({
-    Name = "🌿 PLANTS vs BRAINROTS 🧠 | ULTIMATE HUB", 
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "PlantsVsBrainrotsConfig",
-    IntroEnabled = true,
-    IntroText = "ULTIMATE HUB"
+local Window = Venus:Create({
+    Name = "🌿 PLANTS vs BRAINROTS 🧠", 
+    LoadingTitle = "Plants vs Brainrots Ultimate",
+    LoadingSubtitle = "by Venus UI",
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = "PlantsVsBrainrots",
+       FileName = "Config"
+    },
+    Discord = {
+       Enabled = false,
+       Invite = "noinvitelink",
+       RememberJoins = true
+    },
+    KeySystem = false,
+    KeySettings = {
+       Title = "Untitled",
+       Subtitle = "Key System",
+       Note = "No method of obtaining the key is provided",
+       FileName = "Key",
+       SaveKey = true,
+       GrabKeyFromSite = false,
+       Key = {"Hello"}
+    }
 })
-
--- Переменные
-local AutoBuyEnabled = false
-local AntiAFKEnabled = true
-local ClubMultiplierEnabled = false
-local AutoPlantEnabled = false
-local AutoCollectEnabled = false
-local AutoUpgradeEnabled = false
-local GodModeEnabled = false
-local SpeedHackEnabled = false
-local JumpPowerEnabled = false
-local NoClipEnabled = false
-
-local CurrentMultiplier = 10
-local SpeedValue = 50
-local JumpValue = 50
 
 -- Табы
-local FarmTab = Window:MakeTab({
-    Name = "🤖 Auto Farm",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local MainTab = Window:CreateTab("🏠 Main")
+local AutoFarmSection = MainTab:CreateSection("🤖 Auto Farm")
+local CombatSection = MainTab:CreateSection("⚔️ Combat")
 
-local CombatTab = Window:MakeTab({
-    Name = "⚔️ Combat",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local PlayerTab = Window:CreateTab("🎮 Player")
+local MovementSection = PlayerTab:CreateSection("🚀 Movement")
+local CharacterSection = PlayerTab:CreateSection("👤 Character")
 
-local PlayerTab = Window:MakeTab({
-    Name = "🎮 Player",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local VisualTab = Window:CreateTab("✨ Visual")
+local EffectsSection = VisualTab:CreateSection("🎭 Effects")
 
-local VisualTab = Window:MakeTab({
-    Name = "✨ Visual",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+local MiscTab = Window:CreateTab("⚙️ Misc")
+local SettingsSection = MiscTab:CreateSection("🔧 Settings")
 
-local SettingsTab = Window:MakeTab({
-    Name = "⚙️ Settings",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
+-- Переменные
+local AutoBuy = false
+local AutoPlant = false
+local AutoCollect = false
+local AutoUpgrade = false
+local ClubMultiplier = false
+local GodMode = false
+local SpeedEnabled = false
+local JumpEnabled = false
+local NoClip = false
+local AntiAFK = true
+
+local MultiplierValue = 10
+local WalkSpeed = 16
+local JumpPower = 50
 
 -- Функции
-function AutoBuyPlants()
-    spawn(function()
-        while AutoBuyEnabled do
-            -- Умный поиск магазинов
-            local foundShop = false
-            
-            -- Поиск по известным местам
-            local potentialShops = {
-                "Shops", "VendingMachines", "Shop", "Store", "Market", "Vendor",
-                "PlantShop", "SeedShop", "GardenShop"
-            }
-            
-            for _, shopName in pairs(potentialShops) do
-                local shop = workspace:FindFirstChild(shopName)
-                if shop then
-                    for _, item in pairs(shop:GetDescendants()) do
-                        if item:IsA("ClickDetector") then
-                            fireclickdetector(item)
-                            foundShop = true
-                            wait(0.2)
-                        end
-                    end
+function BuyAllPlants()
+    while AutoBuy do
+        -- Поиск магазинов в workspace
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and (string.find(obj.Name:lower(), "shop") or string.find(obj.Name:lower(), "vendor") or string.find(obj.Name:lower(), "store")) then
+                if obj:FindFirstChild("ClickDetector") then
+                    fireclickdetector(obj.ClickDetector)
+                    wait(0.2)
                 end
             end
-            
-            -- Поиск по всем объектам
-            if not foundShop then
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("Model") and (string.find(string.lower(obj.Name), "shop") or 
-                       string.find(string.lower(obj.Name), "vendor") or 
-                       string.find(string.lower(obj.Name), "store") or
-                       string.find(string.lower(obj.Name), "buy")) then
-                        if obj:FindFirstChild("ClickDetector") then
-                            fireclickdetector(obj.ClickDetector)
-                            wait(0.2)
-                        end
-                    end
-                end
-            end
-            
-            -- GUI покупки
-            local playerGui = Player:FindFirstChild("PlayerGui")
-            if playerGui then
-                for _, gui in pairs(playerGui:GetDescendants()) do
-                    if gui:IsA("TextButton") and (string.find(string.lower(gui.Text), "buy") or 
-                       string.find(string.lower(gui.Text), "purchase") or 
-                       string.find(string.lower(gui.Text), "купить")) then
-                        pcall(function()
-                            gui:FireServer("Activated")
-                        end)
-                        wait(0.1)
-                    end
-                end
-            end
-            wait(1)
         end
-    end)
+        
+        -- Поиск кнопок покупки в GUI
+        local playerGui = game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+        if playerGui then
+            for _, gui in pairs(playerGui:GetDescendants()) do
+                if gui:IsA("TextButton") and (string.find(gui.Text:lower(), "buy") or string.find(gui.Text:lower(), "purchase") or string.find(gui.Text:lower(), "купить")) then
+                    pcall(function()
+                        gui:FireServer("Activated")
+                    end)
+                    wait(0.1)
+                end
+            end
+        end
+        wait(1)
+    end
+end
+
+function PlantAllSeeds()
+    while AutoPlant do
+        -- Поиск мест для посадки
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") and (string.find(obj.Name:lower(), "plot") or string.find(obj.Name:lower(), "soil") or string.find(obj.Name:lower(), "garden")) then
+                if obj:FindFirstChild("ClickDetector") then
+                    fireclickdetector(obj.ClickDetector)
+                    wait(0.1)
+                end
+            end
+        end
+        wait(2)
+    end
+end
+
+function CollectAllCoins()
+    while AutoCollect do
+        -- Сбор монет и ресурсов
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("Part") and (string.find(obj.Name:lower(), "coin") or string.find(obj.Name:lower(), "money") or string.find(obj.Name:lower(), "reward")) then
+                if obj:FindFirstChild("ClickDetector") then
+                    fireclickdetector(obj.ClickDetector)
+                end
+            end
+        end
+        wait(0.5)
+    end
 end
 
 function ApplyClubMultiplier()
-    spawn(function()
-        while ClubMultiplierEnabled do
-            -- Умножение урона через инструменты
-            local character = Player.Character
-            if character then
-                for _, tool in pairs(character:GetChildren()) do
-                    if tool:IsA("Tool") then
-                        -- Поиск значений урона
-                        local damageValues = {
-                            "Damage", "damage", "Attack", "attack", 
-                            "Power", "power", "Strength", "strength"
-                        }
-                        
-                        for _, damageName in pairs(damageValues) do
-                            local damage = tool:FindFirstChild(damageName)
-                            if damage and damage:IsA("NumberValue") then
-                                damage.Value = damage.Value * CurrentMultiplier
+    while ClubMultiplier do
+        -- Умножение урона дубинки
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            for _, tool in pairs(character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    local damage = tool:FindFirstChild("Damage")
+                    if damage and damage:IsA("NumberValue") then
+                        damage.Value = damage.Value * MultiplierValue
+                    end
+                end
+            end
+        end
+        
+        -- Перехват remote events для урона
+        pcall(function()
+            for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+                if remote:IsA("RemoteEvent") and (string.find(remote.Name:lower(), "damage") or string.find(remote.Name:lower(), "hit")) then
+                    local oldFire = remote.FireServer
+                    remote.FireServer = function(self, ...)
+                        local args = {...}
+                        for i, arg in pairs(args) do
+                            if type(arg) == "number" then
+                                args[i] = arg * MultiplierValue
                             end
                         end
+                        return oldFire(self, unpack(args))
                     end
                 end
             end
-            
-            -- Перехват RemoteEvents
-            pcall(function()
-                local remotes = game:GetService("ReplicatedStorage"):GetDescendants()
-                for _, remote in pairs(remotes) do
-                    if remote:IsA("RemoteEvent") then
-                        local remoteName = string.lower(remote.Name)
-                        if string.find(remoteName, "damage") or 
-                           string.find(remoteName, "hit") or 
-                           string.find(remoteName, "attack") then
-                           
-                            local oldFire = remote.FireServer
-                            remote.FireServer = function(self, ...)
-                                local args = {...}
-                                -- Умножаем числовые аргументы
-                                for i, arg in pairs(args) do
-                                    if type(arg) == "number" then
-                                        args[i] = arg * CurrentMultiplier
-                                    end
-                                end
-                                return oldFire(self, unpack(args))
-                            end
-                        end
-                    end
-                end
-            end)
-            wait(0.3)
-        end
-    end)
+        end)
+        wait(0.3)
+    end
 end
 
-function AutoPlant()
-    spawn(function()
-        while AutoPlantEnabled do
-            -- Поиск мест для посадки
-            local plantingSpots = {
-                "Garden", "PlantingSpots", "Plots", "Soil", "Farm",
-                "GardenArea", "PlantArea", "FarmArea"
-            }
-            
-            for _, spotName in pairs(plantingSpots) do
-                local spot = workspace:FindFirstChild(spotName)
-                if spot then
-                    for _, plot in pairs(spot:GetDescendants()) do
-                        if plot:IsA("Part") and plot:FindFirstChild("ClickDetector") then
-                            fireclickdetector(plot.ClickDetector)
-                            wait(0.1)
-                        end
-                    end
-                end
+function EnableGodMode()
+    while GodMode do
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.MaxHealth = math.huge
+                humanoid.Health = math.huge
             end
-            
-            -- Универсальный поиск
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("Part") and (string.find(string.lower(obj.Name), "plot") or 
-                   string.find(string.lower(obj.Name), "soil") or 
-                   string.find(string.lower(obj.Name), "garden") or
-                   string.find(string.lower(obj.Name), "plant")) then
-                    if obj:FindFirstChild("ClickDetector") then
-                        fireclickdetector(obj.ClickDetector)
-                        wait(0.1)
-                    end
-                end
-            end
-            wait(0.5)
         end
-    end)
+        wait(0.5)
+    end
 end
 
-function AutoCollect()
-    spawn(function()
-        while AutoCollectEnabled do
-            -- Сбор ресурсов
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("Part") then
-                    local objName = string.lower(obj.Name)
-                    if string.find(objName, "coin") or 
-                       string.find(objName, "money") or 
-                       string.find(objName, "reward") or
-                       string.find(objName, "collect") or
-                       string.find(objName, "resource") then
-                       
-                        if obj:FindFirstChild("ClickDetector") then
-                            fireclickdetector(obj.ClickDetector)
-                        end
-                    end
-                end
+function ApplySpeed()
+    while SpeedEnabled do
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = WalkSpeed
             end
-            wait(0.3)
         end
-    end)
+        wait(0.1)
+    end
 end
 
-function ApplyGodMode()
-    spawn(function()
-        while GodModeEnabled do
-            local character = Player.Character
-            if character then
-                local humanoid = character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.MaxHealth = 99999
-                    humanoid.Health = 99999
-                end
+function ApplyJump()
+    while JumpEnabled do
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = JumpPower
             end
-            wait(0.5)
         end
-    end)
-end
-
-function ApplySpeedHack()
-    spawn(function()
-        while SpeedHackEnabled do
-            local character = Player.Character
-            if character then
-                local humanoid = character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.WalkSpeed = SpeedValue
-                end
-            end
-            wait(0.1)
-        end
-    end)
-end
-
-function ApplyJumpPower()
-    spawn(function()
-        while JumpPowerEnabled do
-            local character = Player.Character
-            if character then
-                local humanoid = character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.JumpPower = JumpValue
-                end
-            end
-            wait(0.1)
-        end
-    end)
+        wait(0.1)
+    end
 end
 
 function EnableNoClip()
-    spawn(function()
-        while NoClipEnabled do
-            local character = Player.Character
-            if character then
-                for _, part in pairs(character:GetDescendants()) do
-                    if part:IsA("BasePart") and part.CanCollide then
-                        part.CanCollide = false
-                    end
+    while NoClip do
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
                 end
             end
-            wait(0.1)
         end
-    end)
+        wait(0.1)
+    end
 end
 
--- Farm Tab
-FarmTab:AddToggle({
+-- Авто Фарм секция
+AutoFarmSection:CreateToggle({
     Name = "🛒 Auto Buy Plants",
     Default = false,
     Callback = function(Value)
-        AutoBuyEnabled = Value
+        AutoBuy = Value
         if Value then
-            AutoBuyPlants()
-            OrionLib:MakeNotification({
-                Name = "Auto Buy Started!",
-                Content = "Automatically buying plants...",
-                Image = "rbxassetid://4483345998",
-                Time = 5
+            Venus:Notify({
+                Title = "Auto Buy Started",
+                Description = "Automatically buying all plants in stock",
+                Duration = 3
             })
+            spawn(BuyAllPlants)
         end
-    end    
+    end
 })
 
-FarmTab:AddToggle({
-    Name = "🌱 Auto Plant",
+AutoFarmSection:CreateToggle({
+    Name = "🌱 Auto Plant Seeds",
     Default = false,
     Callback = function(Value)
-        AutoPlantEnabled = Value
+        AutoPlant = Value
         if Value then
-            AutoPlant()
+            spawn(PlantAllSeeds)
         end
-    end    
+    end
 })
 
-FarmTab:AddToggle({
+AutoFarmSection:CreateToggle({
     Name = "💰 Auto Collect Coins",
     Default = false,
     Callback = function(Value)
-        AutoCollectEnabled = Value
+        AutoCollect = Value
         if Value then
-            AutoCollect()
+            spawn(CollectAllCoins)
         end
-    end    
+    end
 })
 
-FarmTab:AddToggle({
+AutoFarmSection:CreateToggle({
     Name = "🆙 Auto Upgrade Plants",
     Default = false,
     Callback = function(Value)
-        AutoUpgradeEnabled = Value
-    end    
+        AutoUpgrade = Value
+    end
 })
 
--- Combat Tab
-CombatTab:AddToggle({
+-- Комбат секция
+CombatSection:CreateToggle({
     Name = "💥 Club Damage Multiplier",
     Default = false,
     Callback = function(Value)
-        ClubMultiplierEnabled = Value
+        ClubMultiplier = Value
         if Value then
-            ApplyClubMultiplier()
+            spawn(ApplyClubMultiplier)
         end
-    end    
+    end
 })
 
-CombatTab:AddSlider({
+CombatSection:CreateSlider({
     Name = "Multiplier Value",
     Min = 1,
     Max = 100,
     Default = 10,
-    Color = Color3.fromRGB(255, 255, 255),
+    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
     ValueName = "x",
     Callback = function(Value)
-        CurrentMultiplier = Value
-    end    
+        MultiplierValue = Value
+    end
 })
 
-CombatTab:AddToggle({
+CombatSection:CreateToggle({
     Name = "🛡️ God Mode",
     Default = false,
     Callback = function(Value)
-        GodModeEnabled = Value
+        GodMode = Value
         if Value then
-            ApplyGodMode()
+            spawn(EnableGodMode)
         end
-    end    
+    end
 })
 
--- Player Tab
-PlayerTab:AddToggle({
+-- Движение секция
+MovementSection:CreateToggle({
     Name = "🚀 Speed Hack",
     Default = false,
     Callback = function(Value)
-        SpeedHackEnabled = Value
+        SpeedEnabled = Value
         if Value then
-            ApplySpeedHack()
+            spawn(ApplySpeed)
         end
-    end    
+    end
 })
 
-PlayerTab:AddSlider({
+MovementSection:CreateSlider({
     Name = "Walk Speed",
     Min = 16,
     Max = 200,
-    Default = 50,
-    Color = Color3.fromRGB(255, 255, 255),
+    Default = 16,
+    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
     ValueName = "studs",
     Callback = function(Value)
-        SpeedValue = Value
-        if SpeedHackEnabled then
-            ApplySpeedHack()
+        WalkSpeed = Value
+        if SpeedEnabled then
+            ApplySpeed()
         end
-    end    
+    end
 })
 
-PlayerTab:AddToggle({
+MovementSection:CreateToggle({
     Name = "🦘 Super Jump",
     Default = false,
     Callback = function(Value)
-        JumpPowerEnabled = Value
+        JumpEnabled = Value
         if Value then
-            ApplyJumpPower()
+            spawn(ApplyJump)
         end
-    end    
+    end
 })
 
-PlayerTab:AddSlider({
+MovementSection:CreateSlider({
     Name = "Jump Power",
     Min = 50,
     Max = 200,
     Default = 50,
-    Color = Color3.fromRGB(255, 255, 255),
+    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
     ValueName = "power",
     Callback = function(Value)
-        JumpValue = Value
-        if JumpPowerEnabled then
-            ApplyJumpPower()
+        JumpPower = Value
+        if JumpEnabled then
+            ApplyJump()
         end
-    end    
+    end
 })
 
-PlayerTab:AddToggle({
+-- Персонаж секция
+CharacterSection:CreateToggle({
     Name = "👻 NoClip",
     Default = false,
     Callback = function(Value)
-        NoClipEnabled = Value
+        NoClip = Value
         if Value then
-            EnableNoClip()
+            spawn(EnableNoClip)
         end
-    end    
+    end
 })
 
--- Visual Tab
-VisualTab:AddButton({
-    Name = "✨ Toggle UI",
+CharacterSection:CreateButton({
+    Name = "🧹 Reset Character",
     Callback = function()
-        OrionLib:ToggleUI()
-    end    
+        game.Players.LocalPlayer.Character:BreakJoints()
+    end
 })
 
-VisualTab:AddColorpicker({
+-- Эффекты секция
+EffectsSection:CreateColorpicker({
     Name = "UI Color",
     Default = Color3.fromRGB(255, 0, 0),
     Callback = function(Value)
         Window:ChangeColor(Value)
-    end    
+    end
 })
 
--- Settings Tab
-SettingsTab:AddToggle({
+EffectsSection:CreateButton({
+    Name = "✨ Rainbow UI",
+    Callback = function()
+        spawn(function()
+            while true do
+                for i = 0, 1, 0.01 do
+                    Window:ChangeColor(Color3.fromHSV(i, 1, 1))
+                    wait(0.1)
+                end
+            end
+        end)
+    end
+})
+
+-- Настройки секция
+SettingsSection:CreateToggle({
     Name = "🔄 Anti-AFK",
     Default = true,
     Callback = function(Value)
-        AntiAFKEnabled = Value
-    end    
+        AntiAFK = Value
+    end
 })
 
-SettingsTab:AddBind({
-    Name = "Toggle Menu Keybind",
+SettingsSection:CreateKeybind({
+    Name = "UI Toggle Keybind",
     Default = Enum.KeyCode.RightShift,
     Hold = false,
     Callback = function()
-        OrionLib:ToggleUI()
-    end    
+        Venus:Toggle()
+    end
 })
 
-SettingsTab:AddButton({
+SettingsSection:CreateButton({
     Name = "💾 Save Configuration",
     Callback = function()
-        OrionLib:MakeNotification({
-            Name = "Configuration Saved!",
-            Content = "Your settings have been saved.",
-            Image = "rbxassetid://4483345998",
-            Time = 5
+        Venus:Notify({
+            Title = "Configuration Saved",
+            Description = "Your settings have been saved!",
+            Duration = 3
         })
-    end    
+    end
 })
 
-SettingsTab:AddButton({
-    Name = "🔄 Refresh Game",
+SettingsSection:CreateButton({
+    Name = "🗑️ Destroy UI",
     Callback = function()
-        game:GetService("TeleportService"):Teleport(game.PlaceId)
-    end    
+        Venus:Destroy()
+    end
 })
 
 -- Анти-АФК система
 spawn(function()
     while true do
-        if AntiAFKEnabled then
-            pcall(function()
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
-                wait(0.1)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
-                wait(0.1)
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.S, false, game)
-                wait(0.1)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.S, false, game)
-            end)
+        if AntiAFK then
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, "W", false, game)
+            wait(0.1)
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, "W", false, game)
+            wait(0.1)
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, "S", false, game)
+            wait(0.1)
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, "S", false, game)
         end
-        wait(20)
+        wait(25)
     end
 end)
 
--- Инициализация
-OrionLib:MakeNotification({
-    Name = "🌿 Plants vs Brainrots Loaded!",
-    Content = " modern TG ---> t.me/TurboModsHack ",
-    Image = "rbxassetid://4483345998",
-    Time = 5
+-- Уведомление о загрузке
+Venus:Notify({
+    Title = "Plants vs Brainrots Loaded!",
+    Description = "Venus UI successfully injected!",
+    Duration = 5
 })
 
-OrionLib:Init()
+-- Инициализация
+Window:SelectTab(MainTab)

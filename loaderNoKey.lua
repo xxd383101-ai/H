@@ -1,18 +1,12 @@
--- Plants vs Brainrots - Horizon UI
-local Horizon = loadstring(game:HttpGet("https://raw.githubusercontent.com/ionlyusegithubformcmods/1-LinoriaLib/main/LinoriaLib%20V3.lua"))()
+-- Plants vs Brainrots - FluxUI Script
+local Flux = loadstring(game:HttpGet('https://raw.githubusercontent.com/roblox_4life/FluxLib/main/Lib.lua'))()
 
-local Window = Horizon:CreateWindow({
-    Title = "🌿 PLANTS vs BRAINROTS | HORIZON",
-    Center = true,
-    AutoShow = true,
-    TabPadding = 8,
-    MenuFadeTime = 0.2
-})
+local Window = Flux:Window("Plants vs Brainrots", "v1.0", Color3.fromRGB(0, 120, 215))
 
 -- Создаем вкладки
-local MainTab = Window:AddTab("Главная")
-local PlayerTab = Window:AddTab("Игрок")
-local SettingsTab = Window:AddTab("Настройки")
+local MainTab = Window:Tab("Main", "http://www.roblox.com/asset/?id=6034818372")
+local PlayerTab = Window:Tab("Player", "http://www.roblox.com/asset/?id=6034818372")
+local SettingsTab = Window:Tab("Settings", "http://www.roblox.com/asset/?id=6034818372")
 
 -- Переменные
 local AutoBuy = false
@@ -95,200 +89,119 @@ function ApplyDamageMultiplier()
     end)
 end
 
--- Секция авто-фарма
-local FarmSection = MainTab:AddLeftGroupbox("Авто Фарм")
-
-FarmSection:AddToggle("AutoBuyToggle", {
-    Text = "🛒 Авто покупка растений",
-    Default = false,
-    Tooltip = "Автоматически покупает растения",
-    Callback = function(Value)
-        AutoBuy = Value
-        if Value then
-            BuyAllPlants()
-        end
+-- Вкладка Main
+MainTab:Toggle("Auto Buy Plants", "Автоматически покупает растения", false, function(Value)
+    AutoBuy = Value
+    if Value then
+        BuyAllPlants()
     end
-})
+end)
 
-FarmSection:AddToggle("AutoPlantToggle", {
-    Text = "🌱 Авто посадка",
-    Default = false,
-    Tooltip = "Автоматически сажает семена",
-    Callback = function(Value)
-        AutoPlant = Value
-        if Value then
-            PlantAllSeeds()
-        end
+MainTab:Toggle("Auto Plant Seeds", "Автоматически сажает семена", false, function(Value)
+    AutoPlant = Value
+    if Value then
+        PlantAllSeeds()
     end
-})
+end)
 
-FarmSection:AddToggle("AutoCollectToggle", {
-    Text = "💰 Авто сбор монет",
-    Default = false,
-    Tooltip = "Автоматически собирает монеты",
-    Callback = function(Value)
-        AutoCollect = Value
-        if Value then
-            CollectAllCoins()
-        end
+MainTab:Toggle("Auto Collect Coins", "Автоматически собирает монеты", false, function(Value)
+    AutoCollect = Value
+    if Value then
+        CollectAllCoins()
     end
-})
+end)
 
--- Секция боевых функций
-local CombatSection = MainTab:AddRightGroupbox("Боевые функции")
-
-CombatSection:AddToggle("DamageMultiplierToggle", {
-    Text = "💥 Множитель урона",
-    Default = false,
-    Tooltip = "Увеличивает урон оружия",
-    Callback = function(Value)
-        DamageMultiplier = Value
-        if Value then
-            ApplyDamageMultiplier()
-        end
+MainTab:Toggle("Damage Multiplier", "Увеличивает урон оружия", false, function(Value)
+    DamageMultiplier = Value
+    if Value then
+        ApplyDamageMultiplier()
     end
-})
+end)
 
-CombatSection:AddSlider("MultiplierSlider", {
-    Text = "Значение множителя",
-    Default = 10,
-    Min = 1,
-    Max = 100,
-    Rounding = 0,
-    Compact = false,
-    Callback = function(Value)
-        MultiplierValue = Value
-    end
-})
+MainTab:Slider("Multiplier Value", "Установите множитель урона", 1, 100, 10, function(Value)
+    MultiplierValue = Value
+end)
 
-CombatSection:AddToggle("GodModeToggle", {
-    Text = "🛡️ Режим бога",
-    Default = false,
-    Tooltip = "Делает вас неуязвимым",
-    Callback = function(Value)
-        GodMode = Value
-        if Value then
-            while GodMode do
-                local character = game.Players.LocalPlayer.Character
-                if character then
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.MaxHealth = math.huge
-                        humanoid.Health = math.huge
-                    end
-                end
-                wait(0.5)
-            end
-        end
-    end
-})
-
--- Секция передвижения
-local MovementSection = PlayerTab:AddLeftGroupbox("Передвижение")
-
-MovementSection:AddToggle("SpeedToggle", {
-    Text = "🚀 Изменение скорости",
-    Default = false,
-    Tooltip = "Изменяет скорость передвижения",
-    Callback = function(Value)
-        SpeedEnabled = Value
-        if Value then
-            while SpeedEnabled do
-                local character = game.Players.LocalPlayer.Character
-                if character then
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.WalkSpeed = WalkSpeed
-                    end
-                end
-                wait(0.1)
-            end
-        else
+MainTab:Toggle("God Mode", "Делает вас неуязвимым", false, function(Value)
+    GodMode = Value
+    if Value then
+        while GodMode do
             local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.WalkSpeed = 16
-            end
-        end
-    end
-})
-
-MovementSection:AddSlider("SpeedSlider", {
-    Text = "Скорость передвижения",
-    Default = 50,
-    Min = 16,
-    Max = 100,
-    Rounding = 0,
-    Compact = false,
-    Callback = function(Value)
-        WalkSpeed = Value
-    end
-})
-
-MovementSection:AddToggle("JumpToggle", {
-    Text = "🦘 Супер прыжок",
-    Default = false,
-    Tooltip = "Увеличивает силу прыжка",
-    Callback = function(Value)
-        JumpEnabled = Value
-        if Value then
-            while JumpEnabled do
-                local character = game.Players.LocalPlayer.Character
-                if character then
-                    local humanoid = character:FindFirstChild("Humanoid")
-                    if humanoid then
-                        humanoid.JumpPower = JumpPower
-                    end
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.MaxHealth = math.huge
+                    humanoid.Health = math.huge
                 end
-                wait(0.1)
             end
-        else
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("Humanoid") then
-                character.Humanoid.JumpPower = 50
-            end
+            wait(0.5)
         end
     end
-})
+end)
 
-MovementSection:AddSlider("JumpSlider", {
-    Text = "Сила прыжка",
-    Default = 50,
-    Min = 50,
-    Max = 200,
-    Rounding = 0,
-    Compact = false,
-    Callback = function(Value)
-        JumpPower = Value
+-- Вкладка Player
+PlayerTab:Toggle("Speed Hack", "Увеличивает скорость передвижения", false, function(Value)
+    SpeedEnabled = Value
+    if Value then
+        while SpeedEnabled do
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = WalkSpeed
+                end
+            end
+            wait(0.1)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = 16
+        end
     end
-})
+end)
 
--- Настройки
-local UISettings = SettingsTab:AddLeftGroupbox("Настройки UI")
+PlayerTab:Slider("Walk Speed", "Установите скорость", 16, 100, 50, function(Value)
+    WalkSpeed = Value
+end)
 
-UISettings:AddToggle("AntiAFKToggle", {
-    Text = "🔄 Anti-AFK",
-    Default = true,
-    Tooltip = "Предотвращает кик за бездействие",
-    Callback = function(Value)
-        AntiAFK = Value
+PlayerTab:Toggle("Super Jump", "Увеличивает силу прыжка", false, function(Value)
+    JumpEnabled = Value
+    if Value then
+        while JumpEnabled do
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    humanoid.JumpPower = JumpPower
+                end
+            end
+            wait(0.1)
+        end
+    else
+        local character = game.Players.LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.JumpPower = 50
+        end
     end
-})
+end)
 
-UISettings:AddButton({
-    Text = "💾 Сохранить настройки",
-    Func = function()
-        Horizon:Notify("Настройки сохранены!", 3)
-    end,
-    DoubleClick = false
-})
+PlayerTab:Slider("Jump Power", "Установите силу прыжка", 50, 200, 50, function(Value)
+    JumpPower = Value
+end)
 
-UISettings:AddButton({
-    Text = "🗑️ Удалить UI",
-    Func = function()
-        Horizon:Unload()
-    end,
-    DoubleClick = true
-})
+-- Вкладка Settings
+SettingsTab:Toggle("Anti-AFK", "Предотвращает кик за бездействие", true, function(Value)
+    AntiAFK = Value
+end)
+
+SettingsTab:Button("Save Settings", "Сохранить настройки", function()
+    Flux:Notification("Настройки сохранены!", "OK")
+end)
+
+SettingsTab:Button("Destroy UI", "Удалить интерфейс", function()
+    Flux:Close()
+end)
 
 -- Анти-АФК система
 spawn(function()
@@ -306,8 +219,4 @@ spawn(function()
     end
 end)
 
--- Уведомление о загрузке
-Horizon:Notify("Plants vs Brainrots загружен!", 5)
-
--- Инициализация
-Horizon:ApplyConfig(Horizon.Config)
+Flux:Init()

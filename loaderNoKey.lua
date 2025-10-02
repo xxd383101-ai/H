@@ -19,24 +19,6 @@ if not success then
     end)
 end
 
-if not success then
-    success, Library = pcall(function()
-        -- Попробовать Flux UI (анимированная)
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/roblox_4life/FluxLib/main/Lib.lua"))()
-    end)
-end
-
-if not success then
-    success, Library = pcall(function()
-        -- Попробовать Astral Library (космическая тема)
-        return loadstring(game:HttpGet("https://raw.githubusercontent.com/ImRayyGG/AstralLib/main/AstralLib.lua"))()
-    end)
-end
-
-if not success then
-    -- Fallback на обычный Kavo
-    Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-end
 
 -- Создание ультра крутого меню
 local Window = Library.CreateLib("🌿 PLANTS vs BRAINROTS 🧠", "DarkTheme")
